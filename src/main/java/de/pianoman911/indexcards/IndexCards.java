@@ -53,7 +53,7 @@ public class IndexCards {
         return this.running;
     }
 
-    public void start(long bootTime) throws IOException {
+    public void start(long bootTime) {
         LOGGER.info("Starting IndexCards...");
 
         LOGGER.info("Reading configuration...");

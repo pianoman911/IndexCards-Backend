@@ -7,6 +7,7 @@ import de.pianoman911.indexcards.web.api.AuthHandler;
 import de.pianoman911.indexcards.web.api.CardDoneHandler;
 import de.pianoman911.indexcards.web.api.CardNowHandler;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class WebServer extends Thread {
@@ -22,10 +23,15 @@ public class WebServer extends Thread {
     public void run() {
         System.out.println("Hello world!");
 
-        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", service.config().port), 0);
+        HttpServer server;
+        try {
+            server = HttpServer.create(new InetSocketAddress("0.0.0.0", service.config().port), 0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         server.createContext("/", new RootHandler());
         server.createContext("/api", new ApiHandler());
-        server.createContext("/api/auth", new AuthHandler(service));
+        server.createContext("/api/account/login", new AuthHandler(service));
         server.createContext("/api/account/create", new AccountCreateHandler(service));
         server.createContext("/api/cards/now", new CardNowHandler(service));
         server.createContext("/api/cards/done", new CardDoneHandler(service));
