@@ -7,6 +7,9 @@ import de.pianoman911.indexcards.sql.DatabaseType;
 import de.pianoman911.indexcards.sql.SqlEscape;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +30,7 @@ public class IndexCardsLogic {
             try {
                 if (resultSet.next()) {
                     User user = new User(name, password);
-                    service.logic().addSession(user);
+                    service.logic().refreshSession(user);
                     future.complete(user);
                     return;
                 }
@@ -43,7 +46,7 @@ public class IndexCardsLogic {
         return sessions.getIfPresent(UUID.fromString(session));
     }
 
-    public User addSession(User user) {
+    public User refreshSession(User user) {
         sessions.asMap().entrySet().removeIf(entry -> entry.getValue().equals(user));
         sessions.put(user.session(), user);
         return user;
@@ -54,14 +57,18 @@ public class IndexCardsLogic {
         String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP());";
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
+                List<String> answers = new ArrayList<>();
+                String question = null;
+                int id = -1;
                 if (resultSet.next()) {
-                    IndexCard card = new IndexCard(resultSet.getString("question"), resultSet.getString("answer"), resultSet.getInt("id"));
-                    service.logic().addSession(user);
-                    future.complete(card);
-                    return;
+                    question = resultSet.getString("question");
+                    answers.add(resultSet.getString("answer"));
+                    id = resultSet.getInt("id");
+                    service.logic().refreshSession(user);
                 }
+                future.complete(new IndexCard(id, question, answers));
             } catch (SQLException ignored) {
-
+                future.complete(null);
             }
             future.complete(null);
         });
@@ -89,8 +96,47 @@ public class IndexCardsLogic {
         return future;
     }
 
-    public void doneCard(User user, int id, long timestamp) {
-        String statement = "INSERT INTO USER.progress (`user`, `card`, `time`) VALUE (" + SqlEscape.word(user.name()) + ", '" + id + "', '" + timestamp + "' );";
+    public void doneCard(User user, int id, long timestamp, int status) {
+        String statement = "INSERT INTO USER.progress (`user`, `card`, `time`, `status`) VALUE (" + SqlEscape.word(user.name()) + ", '" + id + "', '" + timestamp + "', '" + status + "') ON DUPLICATE KEY UPDATE time = '" + timestamp + "', status = '" + status + "'";
         service.queue().write(DatabaseType.USER, statement);
+    }
+
+    public CompletableFuture<IndexCard> card(int id) {
+        CompletableFuture<IndexCard> future = new CompletableFuture<>();
+        String statement = "SELECT * FROM CARD.cards WHERE id = " + id + " LIMIT 1";
+        service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
+            try {
+                List<String> answers = new ArrayList<>();
+                String question = null;
+                if (resultSet.next()) {
+                    question = resultSet.getString("question");
+                    answers.add(resultSet.getString("answer"));
+                }
+                future.complete(new IndexCard(id, question, answers));
+            } catch (SQLException ignored) {
+
+            }
+            future.complete(null);
+        });
+        return future;
+    }
+
+    public CompletableFuture<Integer> nextStatus(User user, IndexCard card) {
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        String statement = "SELECT * FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND card = " + card.id() + " LIMIT 1";
+        service.queue().readAsync(DatabaseType.USER, statement).thenAccept(resultSet -> {
+            try {
+                if (resultSet.next()) {
+                    future.complete(Math.min(4, resultSet.getInt("status")) + 1);
+                } else {
+                    future.complete(1);
+                }
+                return;
+            } catch (SQLException ignored) {
+
+            }
+            future.complete(null);
+        });
+        return future;
     }
 }

@@ -34,7 +34,7 @@ public class AccountCreateHandler implements HttpHandler {
             return;
         }
 
-        if (name == null || password == null || password.length() != 64) {
+        if (name == null || password == null || password.length() != 64 || name.length() > 50 || name.length() < 3) {
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;
@@ -51,7 +51,6 @@ public class AccountCreateHandler implements HttpHandler {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
-            return;
         }
     }
 }
