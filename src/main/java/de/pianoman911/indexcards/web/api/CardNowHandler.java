@@ -41,7 +41,6 @@ public class CardNowHandler implements HttpHandler {
             JsonObject object = new JsonObject();
             object.addProperty("id", card.id());
             object.addProperty("question", card.question());
-            object.addProperty("answer", card.answer());
 
             exchange.sendResponseHeaders(200, 0);
             StreamUtils.writeJsonFully(object, exchange.getResponseBody());

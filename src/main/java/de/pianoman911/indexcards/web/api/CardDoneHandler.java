@@ -69,8 +69,8 @@ public class CardDoneHandler implements HttpHandler {
                 answers.removeIf(s -> s.equalsIgnoreCase(input));
                 object.addProperty("others", String.join(">>>", answers));
             }
-
             exchange.sendResponseHeaders(200, 0);
+            StreamUtils.writeJsonFully(object, exchange.getResponseBody());
             exchange.getResponseBody().close();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             exchange.sendResponseHeaders(400, 0);
