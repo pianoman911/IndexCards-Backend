@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpHandler;
 import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.logic.User;
 import de.pianoman911.indexcards.util.StreamUtils;
+import de.pianoman911.indexcards.web.WebServer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -22,14 +23,22 @@ public class AuthHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        System.out.println("AuthHandler");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         String name;
         String password;
+
+        if (WebServer.checkCors(exchange)) {
+            return;
+        }
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             name = response.get("name").getAsString();
             password = response.get("password").getAsString();
+            System.out.println("name: " + name + " password: " + password);
         } catch (Exception e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;

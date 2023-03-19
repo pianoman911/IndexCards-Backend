@@ -1,5 +1,6 @@
 package de.pianoman911.indexcards.web;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.web.api.AccountCreateHandler;
@@ -29,7 +30,7 @@ public class WebServer extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        server.createContext("/", new RootHandler());
+        //   server.createContext("/", new RootHandler());
         server.createContext("/api", new ApiHandler());
         server.createContext("/api/account/login", new AuthHandler(service));
         server.createContext("/api/account/create", new AccountCreateHandler(service));
@@ -38,5 +39,16 @@ public class WebServer extends Thread {
 
         server.start();
 
+    }
+
+    public static boolean checkCors(HttpExchange exchange) {
+        if (exchange.getRequestMethod().equals("OPTIONS")) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+            exchange.sendResponseHeaders(200, 0);
+            exchange.getResponseBody().close();
+            return true;
+        }
+        return false;
     }
 }

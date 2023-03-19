@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.util.StreamUtils;
+import de.pianoman911.indexcards.web.WebServer;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -24,6 +25,10 @@ public class AccountCreateHandler implements HttpHandler {
         String name;
         String password;
 
+        if (WebServer.checkCors(exchange)) {
+            return;
+        }
+
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             name = response.get("name").getAsString();
@@ -39,6 +44,7 @@ public class AccountCreateHandler implements HttpHandler {
             exchange.getResponseBody().close();
             return;
         }
+        System.out.println("name: " + name + " password: " + password);
 
         try {
             if (service.logic().createUser(name, password).get(5, TimeUnit.SECONDS) != null) {

@@ -7,6 +7,7 @@ import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.logic.IndexCard;
 import de.pianoman911.indexcards.logic.User;
 import de.pianoman911.indexcards.util.StreamUtils;
+import de.pianoman911.indexcards.web.WebServer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,9 +27,14 @@ public class CardDoneHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         User user;
         int id;
         String input;
+
+        if (WebServer.checkCors(exchange)) {
+            return;
+        }
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());

@@ -7,6 +7,7 @@ import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.logic.IndexCard;
 import de.pianoman911.indexcards.logic.User;
 import de.pianoman911.indexcards.util.StreamUtils;
+import de.pianoman911.indexcards.web.WebServer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,10 @@ public class CardNowHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        if (WebServer.checkCors(exchange)) {
+            return;
+        }
+
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             User user = service.logic().session(response.get("session").getAsString());
