@@ -13,8 +13,8 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 
 public class QueueManager {
 
-    private final ExecutorService writePool = newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("TJCProxy SQL Write Queue #%d").build());
-    private final ExecutorService readPool = newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("TJCProxy SQL Read Queue #%d").build());
+    private final ExecutorService writePool = newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("IndexCards SQL Write Queue #%d").build());
+    private final ExecutorService readPool = newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("IndexCards SQL Read Queue #%d").build());
     private final WriteQueue writeQueue;
     private final ReadQueue readQueue;
 

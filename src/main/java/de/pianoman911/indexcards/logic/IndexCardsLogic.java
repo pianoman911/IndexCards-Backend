@@ -8,8 +8,11 @@ import de.pianoman911.indexcards.sql.SqlEscape;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -52,21 +55,25 @@ public class IndexCardsLogic {
         return user;
     }
 
-    public CompletableFuture<IndexCard> nextCard(User user) {
+    public CompletableFuture<IndexCard> nextCard(User user, String g) {
         CompletableFuture<IndexCard> future = new CompletableFuture<>();
-        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP());";
+        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group LIKE " + SqlEscape.word(g) + "%;");
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
                 List<String> answers = new ArrayList<>();
-                String question = null;
-                int id = -1;
+                String question;
+                int id;
+                String group;
                 if (resultSet.next()) {
                     question = resultSet.getString("question");
                     answers.add(resultSet.getString("answer"));
                     id = resultSet.getInt("id");
+                    group = resultSet.getString("group");
                     service.logic().refreshSession(user);
+                    future.complete(new IndexCard(id, question, answers, group));
+                } else {
+                    future.complete(null);
                 }
-                future.complete(new IndexCard(id, question, answers));
             } catch (SQLException ignored) {
                 future.complete(null);
             }
@@ -108,11 +115,13 @@ public class IndexCardsLogic {
             try {
                 List<String> answers = new ArrayList<>();
                 String question = null;
+                String group = null;
                 if (resultSet.next()) {
                     question = resultSet.getString("question");
                     answers.add(resultSet.getString("answer"));
+                    group = resultSet.getString("group");
                 }
-                future.complete(new IndexCard(id, question, answers));
+                future.complete(new IndexCard(id, question, answers, group));
             } catch (SQLException ignored) {
 
             }
@@ -136,6 +145,24 @@ public class IndexCardsLogic {
 
             }
             future.complete(null);
+        });
+        return future;
+    }
+
+    public CompletableFuture<Set<String>> groups() {
+        CompletableFuture<Set<String>> future = new CompletableFuture<>();
+        String statement = "SELECT DISTINCT `group` FROM CARD.cards;";
+        service.queue().readAsync(DatabaseType.CARD, statement).thenAccept(resultSet -> {
+            Set<String> groups = new HashSet<>();
+            try {
+                while (resultSet.next()) {
+                    String group = resultSet.getString("group");
+                    groups.addAll(Arrays.asList(group.split("/")));
+                }
+                future.complete(groups);
+            } catch (SQLException ignored) {
+                future.complete(Collections.emptySet());
+            }
         });
         return future;
     }

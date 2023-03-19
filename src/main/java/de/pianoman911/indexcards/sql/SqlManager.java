@@ -26,6 +26,7 @@ public class SqlManager {
         if (this.factories.containsKey(factory.type())) {
             LOGGER.warn("Tried adding another ConnectionFactory for {}", factory.type());
         } else {
+            LOGGER.info("Registered ConnectionFactory for {}", factory.type());
             this.factories.put(factory.type(), factory.init(this.service));
         }
     }

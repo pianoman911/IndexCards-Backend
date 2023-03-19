@@ -30,7 +30,7 @@ public class ConnectionFactory {
 
     public ConnectionFactory init(IndexCards service) {
         HikariConfig config = new HikariConfig();
-        config.setPoolName("tjcproxy-hikari");
+        config.setPoolName("index-cards-hikari");
 
         Map<String, String> properties = new HashMap<>();
 

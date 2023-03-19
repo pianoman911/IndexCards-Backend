@@ -6,6 +6,7 @@ import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.web.api.AccountCreateHandler;
 import de.pianoman911.indexcards.web.api.AuthHandler;
 import de.pianoman911.indexcards.web.api.CardDoneHandler;
+import de.pianoman911.indexcards.web.api.CardGroupsHandler;
 import de.pianoman911.indexcards.web.api.CardNowHandler;
 
 import java.io.IOException;
@@ -18,6 +19,21 @@ public class WebServer extends Thread {
     public WebServer(IndexCards service) {
         super("WebServer");
         this.service = service;
+    }
+
+    public static boolean checkCors(HttpExchange exchange) {
+        try {
+            if (exchange.getRequestMethod().equals("OPTIONS")) {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().close();
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -36,19 +52,9 @@ public class WebServer extends Thread {
         server.createContext("/api/account/create", new AccountCreateHandler(service));
         server.createContext("/api/cards/now", new CardNowHandler(service));
         server.createContext("/api/cards/done", new CardDoneHandler(service));
+        server.createContext("/api/cards/groups", new CardGroupsHandler(service));
 
         server.start();
 
-    }
-
-    public static boolean checkCors(HttpExchange exchange) {
-        if (exchange.getRequestMethod().equals("OPTIONS")) {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-            exchange.sendResponseHeaders(200, 0);
-            exchange.getResponseBody().close();
-            return true;
-        }
-        return false;
     }
 }

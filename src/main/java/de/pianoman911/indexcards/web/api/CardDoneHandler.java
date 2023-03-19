@@ -27,14 +27,14 @@ public class CardDoneHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        if (WebServer.checkCors(exchange)) {
+            return;
+        }
         User user;
         int id;
         String input;
 
-        if (WebServer.checkCors(exchange)) {
-            return;
-        }
+
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());

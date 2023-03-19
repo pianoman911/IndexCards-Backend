@@ -23,14 +23,11 @@ public class AuthHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("AuthHandler");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        String name;
-        String password;
-
         if (WebServer.checkCors(exchange)) {
             return;
         }
+        String name;
+        String password;
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());

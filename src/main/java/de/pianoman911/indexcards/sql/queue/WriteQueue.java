@@ -1,5 +1,4 @@
 package de.pianoman911.indexcards.sql.queue;
-// Created by booky10 in TJCProxy (22:36 02.06.21)
 
 import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.sql.DatabaseType;
@@ -24,8 +23,8 @@ public record WriteQueue(IndexCards service) {
                 }
             } catch (SQLException exception) {
                 LOGGER.error(
-                    "Statement id {} \"{}\" on database {} with action {} caused {}",
-                    statement.id(), statement.statement(), statement.database(), statement.action(), exception
+                        "Statement id {} \"{}\" on database {} with action {} caused {}",
+                        statement.id(), statement.statement(), statement.database(), statement.action(), exception
                 );
                 throw new RuntimeException(exception);
             }

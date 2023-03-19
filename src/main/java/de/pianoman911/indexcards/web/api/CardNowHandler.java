@@ -28,7 +28,13 @@ public class CardNowHandler implements HttpHandler {
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
-            User user = service.logic().session(response.get("session").getAsString());
+            String session = response.get("session").getAsString();
+            String group = null;
+            if (response.has("group")) {
+                group = response.get("group").getAsString();
+            }
+
+            User user = service.logic().session(session);
 
             if (user == null) {
                 exchange.sendResponseHeaders(401, 0);
@@ -37,9 +43,9 @@ public class CardNowHandler implements HttpHandler {
             }
 
 
-            IndexCard card = service.logic().nextCard(user).get(5, TimeUnit.SECONDS);
+            IndexCard card = service.logic().nextCard(user, group).get(5, TimeUnit.SECONDS);
             if (card == null) {
-                exchange.sendResponseHeaders(401, 0);
+                exchange.sendResponseHeaders(204, 0);
                 exchange.getResponseBody().close();
                 return;
             }
@@ -52,7 +58,6 @@ public class CardNowHandler implements HttpHandler {
             exchange.getResponseBody().close();
 
         } catch (Exception e) {
-            e.printStackTrace();
             exchange.sendResponseHeaders(401, 0);
             exchange.getResponseBody().close();
         }

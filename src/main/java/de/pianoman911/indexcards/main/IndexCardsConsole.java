@@ -79,7 +79,7 @@ public class IndexCardsConsole extends SimpleTerminalConsole {
 
     @Override
     protected LineReader buildReader(LineReaderBuilder builder) {
-        return super.buildReader(builder.appName("TJCUpdater")
+        return super.buildReader(builder.appName("IndexCards")
                 .variable(LineReader.HISTORY_FILE, Paths.get(".console_history")));
     }
 }
