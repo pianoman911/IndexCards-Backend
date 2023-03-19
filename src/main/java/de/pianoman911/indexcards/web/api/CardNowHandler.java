@@ -42,7 +42,6 @@ public class CardNowHandler implements HttpHandler {
                 return;
             }
 
-
             IndexCard card = service.logic().nextCard(user, group).get(5, TimeUnit.SECONDS);
             if (card == null) {
                 exchange.sendResponseHeaders(204, 0);

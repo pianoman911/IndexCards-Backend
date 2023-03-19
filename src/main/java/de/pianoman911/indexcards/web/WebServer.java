@@ -38,8 +38,6 @@ public class WebServer extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Hello world!");
-
         HttpServer server;
         try {
             server = HttpServer.create(new InetSocketAddress("0.0.0.0", service.config().port), 0);
