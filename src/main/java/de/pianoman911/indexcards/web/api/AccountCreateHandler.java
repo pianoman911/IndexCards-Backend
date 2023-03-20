@@ -22,12 +22,11 @@ public class AccountCreateHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String name;
-        String password;
-
         if (WebServer.checkCors(exchange)) {
             return;
         }
+        String name;
+        String password;
 
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
