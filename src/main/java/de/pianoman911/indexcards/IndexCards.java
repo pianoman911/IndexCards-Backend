@@ -20,6 +20,7 @@ import java.nio.file.Path;
 public class IndexCards {
 
     public static final Gson GSON = new GsonBuilder().serializeNulls().create();
+    public static IndexCards INSTANCE;
     private static final Logger LOGGER = LogManager.getLogger(IndexCards.class);
 
     static {
@@ -38,6 +39,7 @@ public class IndexCards {
     private IndexCardsLogic logic;
 
     public IndexCards(Path configPath) {
+        INSTANCE = this;
         this.configPath = configPath;
     }
 

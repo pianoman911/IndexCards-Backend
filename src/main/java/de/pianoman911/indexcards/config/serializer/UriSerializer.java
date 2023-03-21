@@ -1,4 +1,4 @@
-package de.pianoman911.indexcards.config;
+package de.pianoman911.indexcards.config.serializer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;

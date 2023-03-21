@@ -23,7 +23,7 @@ public class WebServer extends Thread {
 
     public static boolean checkCors(HttpExchange exchange) {
         try {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", IndexCards.INSTANCE.config().origin);
             if (exchange.getRequestMethod().equals("OPTIONS")) {
                 exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST");
                 exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");

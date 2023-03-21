@@ -1,4 +1,4 @@
-package de.pianoman911.indexcards.config;
+package de.pianoman911.indexcards.config.serializer;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;

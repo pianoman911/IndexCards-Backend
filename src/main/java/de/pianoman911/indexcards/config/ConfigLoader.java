@@ -1,5 +1,10 @@
 package de.pianoman911.indexcards.config;
 
+import de.pianoman911.indexcards.config.serializer.AddressSerializer;
+import de.pianoman911.indexcards.config.serializer.EnumSerializer;
+import de.pianoman911.indexcards.config.serializer.PathSerializer;
+import de.pianoman911.indexcards.config.serializer.UUIDSerializer;
+import de.pianoman911.indexcards.config.serializer.UriSerializer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader;
 import org.spongepowered.configurate.yaml.NodeStyle;

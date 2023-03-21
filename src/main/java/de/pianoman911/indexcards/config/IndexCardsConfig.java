@@ -16,6 +16,8 @@ public class IndexCardsConfig {
     @Comment("MySQL connection credentials")
     public MySql mysql = new MySql();
 
+    @Comment("The origin of the webserver (for CORS)")
+    public String origin = "https://localhost:8080";
 
     @ConfigSerializable
     public static class MySql {
