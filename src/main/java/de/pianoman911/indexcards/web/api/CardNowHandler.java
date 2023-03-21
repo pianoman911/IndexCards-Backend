@@ -31,7 +31,7 @@ public class CardNowHandler implements HttpHandler {
             String session = response.get("session").getAsString();
             String group = null;
             if (response.has("group")) {
-                group = response.get("group").getAsString();
+                group = response.get("group").getAsString().replaceAll("-","/");
             }
 
             User user = service.logic().session(session);

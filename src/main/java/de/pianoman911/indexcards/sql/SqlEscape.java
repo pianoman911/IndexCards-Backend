@@ -43,8 +43,8 @@ public final class SqlEscape {
                 }
                 char c = chars[i];
 
-                // only allow 0-9, A-Z, _ & a-z
-                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || (c >= 'a' && c <= 'z')) {
+                // only allow 0-9, A-Z, _ & a-z /
+                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '_' || c == '/' || (c >= 'a' && c <= 'z')) {
                     builder.append(c);
                 }
             }

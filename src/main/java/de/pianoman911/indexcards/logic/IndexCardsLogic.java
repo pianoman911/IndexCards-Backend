@@ -8,7 +8,6 @@ import de.pianoman911.indexcards.sql.SqlEscape;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -57,10 +56,8 @@ public class IndexCardsLogic {
 
     public CompletableFuture<IndexCard> nextCard(User user, String g) {
         CompletableFuture<IndexCard> future = new CompletableFuture<>();
-        g = SqlEscape.word(g);
-        g = g.substring(1, g.length() - 1);
-        g = "'%" + g + "%'";
-        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group LIKE " + g + ";");
+        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group = " + SqlEscape.escape(g) + ";");
+
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
                 List<String> answers = new ArrayList<>();
@@ -160,7 +157,15 @@ public class IndexCardsLogic {
             try {
                 while (resultSet.next()) {
                     String group = resultSet.getString("group");
-                    groups.addAll(Arrays.asList(group.split("/")));
+                    String[] splitted = group.split("/");
+                    String root = "";
+                    for (int i = 0; i < splitted.length; i++) {
+                        root += splitted[i];
+                        groups.add(root);
+                        if (splitted.length - 1 > i) {
+                            root += "-";
+                        }
+                    }
                 }
                 future.complete(groups);
             } catch (SQLException ignored) {
