@@ -56,8 +56,12 @@ public class IndexCardsLogic {
 
     public CompletableFuture<IndexCard> nextCard(User user, String g) {
         CompletableFuture<IndexCard> future = new CompletableFuture<>();
-        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group = " + SqlEscape.escape(g) + ";");
-
+        if (g != null) {
+            g = SqlEscape.escape(g);
+            g = g.substring(1, g.length() - 1);
+            g = "'" + g + "%'";
+        }
+        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group LIKE " + g + ";");
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
                 List<String> answers = new ArrayList<>();
