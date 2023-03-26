@@ -20,6 +20,7 @@ public record ReadQueue(IndexCards service) {
     private @NotNull CompletableFuture<ResultSet> queueStatement(@NotNull SimpleStatement statement) {
         return CompletableFuture.supplyAsync(() -> {
             ResultSet result;
+
             try (Connection connection = service.sql().connection(statement.database())) {
                 try (Statement sqlStatement = connection.createStatement()) {
                     result = sqlStatement.executeQuery(statement.statement());

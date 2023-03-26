@@ -6,6 +6,7 @@ import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.sql.DatabaseType;
 import de.pianoman911.indexcards.sql.SqlEscape;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,7 @@ public class IndexCardsLogic {
     public CompletableFuture<User> handleAuth(String name, String password) {
         CompletableFuture<User> future = new CompletableFuture<>();
         String statement = "SELECT * FROM users WHERE name = " + SqlEscape.word(name) + " AND password = '" + password + "' LIMIT 1";
+        System.out.println(statement);
         service.queue().readAsync(DatabaseType.USER, statement).thenAccept(resultSet -> {
             try {
                 if (resultSet.next()) {
@@ -61,7 +63,7 @@ public class IndexCardsLogic {
             g = g.substring(1, g.length() - 1);
             g = "'" + g + "%'";
         }
-        String statement = "SELECT * FROM CARD.cards WHERE id NOT IN (SELECT card FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group LIKE " + g + ";");
+        String statement = "SELECT * FROM " + DatabaseType.CARD.credentials().database() + ".cards WHERE id NOT IN (SELECT card FROM " + DatabaseType.USER.credentials().database() + ".progress WHERE user = " + SqlEscape.word(user.name()) + " AND time > UNIX_TIMESTAMP())" + (g == null ? ";" : " AND cards.group LIKE " + g + ";");
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
                 List<String> answers = new ArrayList<>();
@@ -70,10 +72,14 @@ public class IndexCardsLogic {
                 String group;
                 if (resultSet.next()) {
                     question = resultSet.getString("question");
-                    answers.add(resultSet.getString("answer"));
                     id = resultSet.getInt("id");
                     group = resultSet.getString("group");
                     service.logic().refreshSession(user);
+                    String a = "SELECT * FROM " + DatabaseType.CARD.credentials().database() + ".answers WHERE card = " + id + ";";
+                    ResultSet ar = service.queue().read(DatabaseType.CARD, a);
+                    while (ar.next()) {
+                        answers.add(ar.getString("answer"));
+                    }
                     future.complete(new IndexCard(id, question, answers, group));
                 } else {
                     future.complete(null);
@@ -90,7 +96,7 @@ public class IndexCardsLogic {
     public CompletableFuture<User> createUser(String name, String password) {
         CompletableFuture<User> future = new CompletableFuture<>();
         String select = "SELECT * FROM users WHERE name = " + SqlEscape.word(name) + "LIMIT 1";
-        String statement = "INSERT INTO USER.users (name, password) VALUE (" + SqlEscape.word(name) + ", '" + password + "')";
+        String statement = "INSERT INTO " + DatabaseType.USER.credentials().database() + ".users (name, password) VALUE (" + SqlEscape.word(name) + ", '" + password + "')";
         service.queue().readAsync(DatabaseType.USER, select).thenAccept(resultSet -> {
             try {
                 if (!resultSet.next()) {
@@ -108,13 +114,13 @@ public class IndexCardsLogic {
     }
 
     public void doneCard(User user, int id, long timestamp, int status) {
-        String statement = "INSERT INTO USER.progress (`user`, `card`, `time`, `status`) VALUE (" + SqlEscape.word(user.name()) + ", '" + id + "', '" + timestamp + "', '" + status + "') ON DUPLICATE KEY UPDATE time = '" + timestamp + "', status = '" + status + "'";
+        String statement = "INSERT INTO " + DatabaseType.USER.credentials().database() + ".progress (`user`, `card`, `time`, `status`) VALUE (" + SqlEscape.word(user.name()) + ", '" + id + "', '" + timestamp + "', '" + status + "') ON DUPLICATE KEY UPDATE time = '" + timestamp + "', status = '" + status + "'";
         service.queue().write(DatabaseType.USER, statement);
     }
 
     public CompletableFuture<IndexCard> card(int id) {
         CompletableFuture<IndexCard> future = new CompletableFuture<>();
-        String statement = "SELECT * FROM CARD.cards WHERE id = " + id + " LIMIT 1";
+        String statement = "SELECT * FROM " + DatabaseType.CARD.credentials().database() + ".cards WHERE id = " + id + " LIMIT 1";
         service.queue().readAsync(DatabaseType.BASIC, statement).thenAccept(resultSet -> {
             try {
                 List<String> answers = new ArrayList<>();
@@ -122,8 +128,12 @@ public class IndexCardsLogic {
                 String group = null;
                 if (resultSet.next()) {
                     question = resultSet.getString("question");
-                    answers.add(resultSet.getString("answer"));
                     group = resultSet.getString("group");
+                }
+                String a = "SELECT * FROM " + DatabaseType.CARD.credentials().database() + ".answers WHERE card = " + id + ";";
+                ResultSet ar = service.queue().read(DatabaseType.CARD, a);
+                while (ar.next()) {
+                    answers.add(ar.getString("answer"));
                 }
                 future.complete(new IndexCard(id, question, answers, group));
             } catch (SQLException ignored) {
@@ -136,7 +146,7 @@ public class IndexCardsLogic {
 
     public CompletableFuture<Integer> nextStatus(User user, IndexCard card) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        String statement = "SELECT * FROM USER.progress WHERE user = " + SqlEscape.word(user.name()) + " AND card = " + card.id() + " LIMIT 1";
+        String statement = "SELECT * FROM " + DatabaseType.USER.credentials().database() + ".progress WHERE user = " + SqlEscape.word(user.name()) + " AND card = " + card.id() + " LIMIT 1";
         service.queue().readAsync(DatabaseType.USER, statement).thenAccept(resultSet -> {
             try {
                 if (resultSet.next()) {
@@ -155,7 +165,7 @@ public class IndexCardsLogic {
 
     public CompletableFuture<Set<String>> groups() {
         CompletableFuture<Set<String>> future = new CompletableFuture<>();
-        String statement = "SELECT DISTINCT `group` FROM CARD.cards;";
+        String statement = "SELECT DISTINCT `group` FROM " + DatabaseType.CARD.credentials().database() + ".cards;";
         service.queue().readAsync(DatabaseType.CARD, statement).thenAccept(resultSet -> {
             Set<String> groups = new HashSet<>();
             try {

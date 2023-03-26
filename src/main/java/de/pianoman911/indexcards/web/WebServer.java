@@ -23,15 +23,15 @@ public class WebServer extends Thread {
 
     public static boolean checkCors(HttpExchange exchange) {
         try {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", IndexCards.INSTANCE.config().origin);
+            // exchange.getResponseHeaders().add("Access-Control-Allow-Origin", IndexCards.INSTANCE.config().origin);
             if (exchange.getRequestMethod().equals("OPTIONS")) {
-                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST");
-                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
-                exchange.sendResponseHeaders(200, 0);
-                exchange.getResponseBody().close();
+//                exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "*");
+//                exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+                exchange.sendResponseHeaders(204, -1);
+                exchange.close();
                 return true;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

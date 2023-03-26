@@ -6,6 +6,7 @@ import de.pianoman911.indexcards.config.ConfigLoader;
 import de.pianoman911.indexcards.config.IndexCardsConfig;
 import de.pianoman911.indexcards.logic.IndexCardsLogic;
 import de.pianoman911.indexcards.main.IndexCardsConsole;
+import de.pianoman911.indexcards.sql.DatabaseType;
 import de.pianoman911.indexcards.sql.SqlManager;
 import de.pianoman911.indexcards.sql.queue.QueueManager;
 import de.pianoman911.indexcards.web.WebServer;
@@ -14,14 +15,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.sql.ResultSet;
 
 public class IndexCards {
 
     public static final Gson GSON = new GsonBuilder().serializeNulls().create();
-    public static IndexCards INSTANCE;
     private static final Logger LOGGER = LogManager.getLogger(IndexCards.class);
+    public static IndexCards INSTANCE;
 
     static {
         System.setProperty("java.util.logging.manager", org.apache.logging.log4j.jul.LogManager.class.getName());
@@ -78,6 +79,20 @@ public class IndexCards {
 
         LOGGER.info("Loading default hikari data sources...");
         this.sql.connectBasic().resolveCredentials();
+
+        try (ResultSet result = this.queue.read(DatabaseType.USER, "SELECT COUNT(*) FROM users")) {
+            result.first();
+            LOGGER.info("UserCount: {}", result.getInt(1));
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        try (ResultSet result = this.queue.read(DatabaseType.CARD, "SELECT COUNT(*) FROM cards")) {
+            result.first();
+            LOGGER.info("CardsCount: {}", result.getInt(1));
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
 
         double startingTime = (System.currentTimeMillis() - bootTime) / 1000d;
         double startTime = Math.round(startingTime * 100d) / 100d;
