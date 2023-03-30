@@ -115,8 +115,13 @@ public class IndexCardsLogic {
 
     public CompletableFuture<User> createUser(String name, String password) {
         CompletableFuture<User> future = new CompletableFuture<>();
-        String select = "SELECT * FROM users WHERE name = " + SqlEscape.word(name) + "LIMIT 1";
-        String statement = "INSERT INTO " + DatabaseType.USER.credentials().database() + ".users (name, password) VALUE (" + SqlEscape.word(name) + ", '" + password + "')";
+        String escapedName = SqlEscape.word(name);
+        if (!escapedName.equals(name)) {
+            future.complete(null);
+            return future;
+        }
+        String select = "SELECT * FROM users WHERE name = " + escapedName + "LIMIT 1";
+        String statement = "INSERT INTO " + DatabaseType.USER.credentials().database() + ".users (name, password) VALUE (" + escapedName + ", '" + password + "')";
         service.queue().readAsync(DatabaseType.USER, select).thenAccept(resultSet -> {
             try {
                 if (!resultSet.next()) {
