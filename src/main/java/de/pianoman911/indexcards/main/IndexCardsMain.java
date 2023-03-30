@@ -20,7 +20,6 @@ public class IndexCardsMain {
         System.setErr(IoBuilder.forLogger(LOGGER).setLevel(Level.ERROR).buildPrintStream());
     }
 
-
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         Thread.currentThread().setName("Updater Start Thread");

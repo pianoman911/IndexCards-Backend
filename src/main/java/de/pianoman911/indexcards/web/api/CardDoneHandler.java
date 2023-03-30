@@ -34,8 +34,6 @@ public class CardDoneHandler implements HttpHandler {
         int id;
         String input;
 
-
-
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             user = service.logic().session(response.get("session").getAsString());
@@ -50,6 +48,7 @@ public class CardDoneHandler implements HttpHandler {
 
             id = response.get("id").getAsInt();
         } catch (Exception e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;
@@ -58,6 +57,7 @@ public class CardDoneHandler implements HttpHandler {
         service.logic().refreshSession(user);
 
         try {
+
             IndexCard card = service.logic().card(id).get(5, TimeUnit.SECONDS);
             List<String> answers = new ArrayList<>(card.answers());
             JsonObject object = new JsonObject();
@@ -79,6 +79,7 @@ public class CardDoneHandler implements HttpHandler {
             StreamUtils.writeJsonFully(object, exchange.getResponseBody());
             exchange.getResponseBody().close();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;
