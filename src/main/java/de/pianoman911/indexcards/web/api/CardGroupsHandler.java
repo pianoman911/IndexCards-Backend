@@ -34,7 +34,7 @@ public class CardGroupsHandler implements HttpHandler {
             exchange.getResponseBody().close();
         } catch (Exception exception) {
             exchange.getPrincipal();
-            exchange.sendResponseHeaders(400, 0);
+            exchange.sendResponseHeaders(500, 0);
             exchange.getResponseBody().close();
         }
     }
