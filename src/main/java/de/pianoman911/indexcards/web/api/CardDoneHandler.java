@@ -59,6 +59,12 @@ public class CardDoneHandler implements HttpHandler {
         try {
 
             IndexCard card = service.logic().card(id).get(5, TimeUnit.SECONDS);
+            if (card == null) {
+                exchange.sendResponseHeaders(204, 0);
+                exchange.getResponseBody().close();
+                return;
+            }
+
             List<String> answers = new ArrayList<>(card.answers());
             JsonObject object = new JsonObject();
             if (containsIgnoreCase(answers, input)) {
