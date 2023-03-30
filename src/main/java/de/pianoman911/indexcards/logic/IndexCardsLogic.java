@@ -116,7 +116,7 @@ public class IndexCardsLogic {
     public CompletableFuture<User> createUser(String name, String password) {
         CompletableFuture<User> future = new CompletableFuture<>();
         String escapedName = SqlEscape.word(name);
-        if (!escapedName.equals(name)) {
+        if (!escapedName.equals("'" + name + "'")) {
             future.complete(null);
             return future;
         }
