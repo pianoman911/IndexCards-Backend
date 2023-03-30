@@ -1,6 +1,7 @@
 package de.pianoman911.indexcards.config;
 
 import de.pianoman911.indexcards.sql.Credentials;
+import de.pianoman911.indexcards.util.CipherUtils;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
@@ -18,6 +19,9 @@ public class IndexCardsConfig {
 
     @Comment("The origin of the webserver (for CORS)")
     public String origin = "https://localhost:8080";
+
+    @Comment("The secret key used to encrypt the passwords")
+    public String key = CipherUtils.byteToString(CipherUtils.generateKey(), false);
 
     @ConfigSerializable
     public static class MySql {

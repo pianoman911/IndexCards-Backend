@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.pianoman911.indexcards.IndexCards;
+import de.pianoman911.indexcards.util.CipherUtils;
 import de.pianoman911.indexcards.util.StreamUtils;
 import de.pianoman911.indexcards.web.WebServer;
 
@@ -31,14 +32,15 @@ public class AccountCreateHandler implements HttpHandler {
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             name = response.get("name").getAsString();
-            password = response.get("password").getAsString();
+            password = CipherUtils.byteToString(CipherUtils.encryptAES(response.get("password").getAsString(), service.config().key), true);
         } catch (Exception e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;
         }
 
-        if (name == null || password == null || password.length() != 64 || name.length() > 50 || name.length() < 3) {
+        if (name == null || password == null || password.length() > 255 || name.length() > 50 || name.length() < 3) {
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
             return;
@@ -53,6 +55,7 @@ public class AccountCreateHandler implements HttpHandler {
                 exchange.getResponseBody().close();
             }
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);
             exchange.getResponseBody().close();
         }

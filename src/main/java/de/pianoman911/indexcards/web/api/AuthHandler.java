@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.pianoman911.indexcards.IndexCards;
 import de.pianoman911.indexcards.logic.User;
+import de.pianoman911.indexcards.util.CipherUtils;
 import de.pianoman911.indexcards.util.StreamUtils;
 import de.pianoman911.indexcards.web.WebServer;
 
@@ -32,7 +33,7 @@ public class AuthHandler implements HttpHandler {
         try {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             name = response.get("name").getAsString();
-            password = response.get("password").getAsString();
+            password = CipherUtils.byteToString(CipherUtils.encryptAES(response.get("password").getAsString(), service.config().key), true);
         } catch (Exception e) {
             e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);

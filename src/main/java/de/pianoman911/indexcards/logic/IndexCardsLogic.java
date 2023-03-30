@@ -212,12 +212,10 @@ public class IndexCardsLogic {
     private String findLinkAndTryObfuscate(String text) {
         Matcher matcher = LINK_PATTERN.matcher(text);
         if (matcher.find()) {
-            System.out.println("Found link: " + matcher.group());
             String link = matcher.group();
             String obfuscated = "https://api-indexcards.finndohrmann.de/api/image/" + obfuscateLink(link);
             return matcher.replaceAll(obfuscated);
         }
-        System.out.println("No link found in: " + text);
         return text;
     }
 
@@ -227,7 +225,6 @@ public class IndexCardsLogic {
         }
         String hashed = Hashing.sha256().hashString(link, StandardCharsets.UTF_8).toString();
         images.put(hashed, link);
-        System.out.println("Obfuscated link: " + link + " to " + hashed);
         return hashed;
     }
 }
