@@ -8,6 +8,7 @@ import de.pianoman911.indexcards.web.api.AuthHandler;
 import de.pianoman911.indexcards.web.api.CardDoneHandler;
 import de.pianoman911.indexcards.web.api.CardGroupsHandler;
 import de.pianoman911.indexcards.web.api.CardNowHandler;
+import de.pianoman911.indexcards.web.api.ImageHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -52,6 +53,7 @@ public class WebServer extends Thread {
         server.createContext("/api/cards/now", new CardNowHandler(service));
         server.createContext("/api/cards/done", new CardDoneHandler(service));
         server.createContext("/api/cards/groups", new CardGroupsHandler(service));
+        server.createContext("/api/image", new ImageHandler(service));
 
         server.start();
 

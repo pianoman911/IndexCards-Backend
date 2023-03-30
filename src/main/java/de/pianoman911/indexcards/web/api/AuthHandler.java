@@ -33,7 +33,6 @@ public class AuthHandler implements HttpHandler {
             JsonObject response = StreamUtils.readJsonFully(exchange.getRequestBody());
             name = response.get("name").getAsString();
             password = response.get("password").getAsString();
-            System.out.println("name: " + name + " password: " + password);
         } catch (Exception e) {
             e.printStackTrace();
             exchange.sendResponseHeaders(400, 0);

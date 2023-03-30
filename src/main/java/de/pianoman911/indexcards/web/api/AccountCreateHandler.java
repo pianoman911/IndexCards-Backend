@@ -43,7 +43,6 @@ public class AccountCreateHandler implements HttpHandler {
             exchange.getResponseBody().close();
             return;
         }
-        System.out.println("name: " + name + " password: " + password);
 
         try {
             if (service.logic().createUser(name, password).get(5, TimeUnit.SECONDS) != null) {
