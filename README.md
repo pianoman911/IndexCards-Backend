@@ -132,7 +132,7 @@ Start the server
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
 | `session`      | `string` | **Required**. Session token |
-| `group`      | `string` | **Optional**. Session token |
+| `group`      | `string` | **Optional**. Card categorie |
 
 #### Respone
 | Code  | Meaning             |
